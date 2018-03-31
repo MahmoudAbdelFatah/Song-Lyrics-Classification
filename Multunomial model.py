@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Feb 15 17:13:04 2018
-
+Created on Fri Mar 30 20:10:06 2018
 @author: mahmoudabdelfatahabd
 """
 from nltk.corpus import stopwords
@@ -9,7 +8,6 @@ from stop_words import get_stop_words
 from nltk.stem.porter import PorterStemmer
 import pandas as pd
 import numpy as np
-import pickle
 #for open csv file 
 import re
 
@@ -28,10 +26,8 @@ stop_words = list(get_stop_words('en'))
 nltk_words = list(stopwords.words('english'))
 stop_words.extend(nltk_words)
 ps = PorterStemmer()
-#get number of rows
-#num_of_rows = int(dataset.count(0)['mood'])
-num_of_rows = int(dataset.count(0)['title'])
 
+num_of_rows = int(dataset.count(0)['title'])
 filtered_lyric = []
 for i in range(0, num_of_rows):
     #get each lyric and remove the new line space
@@ -45,12 +41,9 @@ for i in range(0, num_of_rows):
     #convert list of word to paragraph
     lyric = ' '.join(lyric)
     filtered_lyric.append(lyric)
-    #print(filtered_lyric)
-    #filtered_lyric.clear()
 
 tokenizer = lambda text: text.split()
 tokenizer_porter = lambda text: [ps.stem(word) for word in text.split()]
-
 
 ### feature extraction
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -65,7 +58,7 @@ X_train_feat = cv.fit_transform(filtered_lyric).toarray()
 y = dataset.iloc[:, 4].values
                 
 #Splitting  the dataset into the Training Set and Test set
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X_train_feat, y, test_size=0.20 )
 
 ################################################################################
@@ -82,23 +75,6 @@ from sklearn.metrics import confusion_matrix
 cm = confusion_matrix(y_test, y_pred) 
 
 ################################################################################
-#Support Vector Machine (SVM)
-from sklearn.svm import SVC
-clfSVM = SVC(kernel = 'linear')
-clfSVM.fit(X_train, y_train)
-
-# save the model to disk
-filename = 'finalized_model.sav'
-pickle.dump(clfSVM, open(filename, 'wb'))
-
-#predicting the Test set results
-y_pred = clfSVM.predict(X_test)
-
-# load the model from disk
-#loaded_model = pickle.load(open(filename, 'rb'))
-#result = loaded_model.score(X_test, y_test)
-#print(result*100)
-
 #Making the confusion matrix
 from sklearn.metrics import confusion_matrix
 cm = confusion_matrix(y_test, y_pred) 
